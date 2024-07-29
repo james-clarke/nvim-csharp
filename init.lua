@@ -10,6 +10,15 @@ vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.background = "dark"
 vim.opt.termguicolors = true
+vim.opt.backspace = '2'
+vim.opt.showcmd = true
+vim.opt.laststatus = 2
+vim.opt.autowrite = true
+vim.opt.cursorline = true
+vim.opt.autoread = true
+vim.o.shiftround = true
+vim.o.clipboard = 'unnamedplus'
+vim.o.updatetime = 300
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -31,21 +40,23 @@ vim.opt.rtp:prepend(lazypath)
 -- Set mapleader and maplocalleader before loading plugins
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+-- Set mouse to true
+vim.o.mouse = 'a'
 
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
     -- Define plugins here
-    { 
+    {
       -- gruvbox.nvim
-      "ellisonleao/gruvbox.nvim", 
-      priority = 1000, 
+      "ellisonleao/gruvbox.nvim",
+      priority = 1000,
     },
-    { 
+    {
       -- telescope.nvim
-      'nvim-telescope/telescope.nvim', 
-      tag = '0.1.8', 
-      dependencies = { 'nvim-lua/plenary.nvim' } 
+      'nvim-telescope/telescope.nvim',
+      tag = '0.1.8',
+      dependencies = { 'nvim-lua/plenary.nvim' }
     },
     {
       -- treesitter.nvim
@@ -98,7 +109,7 @@ local configs = require("nvim-treesitter.configs")
 configs.setup({
   ensure_installed = { "c_sharp", "lua", "javascript", "html", "css" },
   highlight = { enable = true },
-  indent = { enable = true },  
+  indent = { enable = true },
 })
 
 -- Setup for neotree.nvim
@@ -128,6 +139,12 @@ require("mason-lspconfig").setup {
 -- Setup for nvim-lspconfig.nvim
 local lspconfig = require('lspconfig')
 lspconfig.lua_ls.setup {
-  settings = {},
+  settings = {
+    ['Lua'] = {
+      diagnostics = {
+        globals = { 'vim' }
+      }
+    },
+  },
 }
 
