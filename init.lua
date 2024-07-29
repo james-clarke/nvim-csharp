@@ -20,6 +20,10 @@ vim.o.shiftround = true
 vim.o.clipboard = 'unnamedplus'
 vim.o.updatetime = 300
 
+-- Custom key-bindings
+vim.keymap.set('n', '<Tab>', ':bnext<CR>')
+vim.keymap.set('n', '<S-Tab>', ':bdelete<CR>')
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -40,7 +44,8 @@ vim.opt.rtp:prepend(lazypath)
 -- Set mapleader and maplocalleader before loading plugins
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
--- Set mouse to true
+
+-- Set mouse support
 vim.o.mouse = 'a'
 
 -- Setup lazy.nvim
@@ -79,6 +84,7 @@ require("lazy").setup({
       dependencies = { 'nvim-tree/nvim-web-devicons' }
     },
     {
+      -- mason.nvim
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "neovim/nvim-lspconfig",
@@ -113,7 +119,7 @@ configs.setup({
 })
 
 -- Setup for neotree.nvim
-vim.keymap.set("n", "<C-b>", ":Neotree filesystem toggle right<CR>")
+vim.keymap.set("n", "<leader>b", ":Neotree filesystem toggle right<CR>")
 
 -- Setup for lualine.nvim
 require("lualine").setup({
@@ -126,25 +132,67 @@ require("mason").setup({
     icons = {
       package_installed = "✓",
       package_pending = "➜",
-      package_uninstalled = "✗"
-    }
-  }
+      package_uninstalled = "✗",
+    },
+  },
 })
 
 -- Setup for mason-lspconfig.nvim
 require("mason-lspconfig").setup {
-  ensure_installed = { "lua_ls", "omnisharp", "tsserver", "angularls", "html", "cssls" },
+  ensure_installed = {
+    "lua_ls",
+    "omnisharp",
+    "tsserver",
+    "angularls",
+    "html",
+    "cssls",
+  },
 }
 
 -- Setup for nvim-lspconfig.nvim
 local lspconfig = require('lspconfig')
+
 lspconfig.lua_ls.setup {
-  settings = {
-    ['Lua'] = {
-      diagnostics = {
-        globals = { 'vim' }
+  on_init = function(client)
+    local path = client.workspace_folders[1].name
+    if vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc') then
+      return
+    end
+
+    client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+      runtime = {
+        version = 'LuaJIT'
+      },
+      workspace = {
+        checkThirdParty = false,
+        library = {
+          vim.env.VIMRUNTIME
+          -- Depending on the usage, you might want to add additional paths here.
+          -- "${3rd}/luv/library"
+          -- "${3rd}/busted/library",
+        }
+        -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+        -- library = vim.api.nvim_get_runtime_file("", true)
       }
-    },
-  },
+    })
+  end,
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { 'vim' },
+      }
+    }
+  }
 }
+vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {})
+
+lspconfig.omnisharp.setup{}
+
+lspconfig.tsserver.setup{}
+
+lspconfig.angularls.setup{}
+
+lspconfig.html.setup{}
+
+lspconfig.cssls.setup{}
 
