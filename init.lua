@@ -89,6 +89,11 @@ require("lazy").setup({
       "williamboman/mason-lspconfig.nvim",
       "neovim/nvim-lspconfig",
     },
+    {
+      -- omnisharp-extended-lsp.nvim
+      "Hoffs/omnisharp-extended-lsp.nvim",
+      name = "omnisharp-extended"
+    },
   },
   -- Automatically check for plugin updates
   checker = { enabled = true },
@@ -185,8 +190,34 @@ lspconfig.lua_ls.setup {
   }
 }
 vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {})
+vim.keymap.set({'n', 'v'}, '<leader>dn', vim.diagnostic.open_float, {})
 
-lspconfig.omnisharp.setup{}
+lspconfig.omnisharp.setup {
+  cmd = { "dotnet", "/opt/homebrew/Cellar/omnisharp-mono/1.35.3/libexec/OmniSharp.Roslyn.dll"},
+    settings = {
+      FormattingOptions = {
+        EnableEditorConfigSupport = true,
+        OrganizeImports = nil,
+      },
+      MsBuild = {
+        LoadProjectsOnDemand = nil,
+      },
+      RoslynExtensionsOptions = {
+        EnableAnalyzersSupport = nil,
+        EnableImportCompletion = nil,
+        AnalyzeOpenDocumentsOnly = nil,
+        EnableDecompilationSupport = nil,
+      },
+      Sdk = {
+        IncludePrereleases = true,
+      },
+    },
+}
+vim.keymap.set('n', '<leader>gd', 'require("omnisharp_extended").lsp_definition()<CR>', { noremap=true, silent=true })
+vim.keymap.set('n', '<leader>D', '<cmd>lua require("omnisharp_extended").lsp_type_definition()<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', 'gr', '<cmd>lua require("omnisharp_extended").lsp_references()<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', 'gi', '<cmd>lua require("omnisharp_extended").lsp_implementation()<CR>', { noremap = true, silent = true })
+
 
 lspconfig.tsserver.setup{}
 
