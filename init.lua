@@ -4,6 +4,7 @@ vim.g.loaded_netrwPlugin = 1
 
 -- Custom vim settings
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.opt.expandtab = true
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
@@ -16,9 +17,14 @@ vim.opt.laststatus = 2
 vim.opt.autowrite = true
 vim.opt.cursorline = true
 vim.opt.autoread = true
-vim.o.shiftround = true
-vim.o.clipboard = 'unnamedplus'
-vim.o.updatetime = 300
+vim.opt.wrap = false
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.ignorecase = true
+vim.opt.shiftround = true
+vim.opt.clipboard = 'unnamedplus'
+vim.opt.updatetime = 300
+vim.opt.scrolloff = 999
 
 -- Custom key-bindings
 vim.keymap.set('n', '<Tab>', ':bnext<CR>')
@@ -155,7 +161,7 @@ require("mason-lspconfig").setup {
 
 -- Setup for nvim-lspconfig.nvim
 local lspconfig = require("lspconfig")
-local util = require 'lspconfig.util'
+local util = require("lspconfig.util")
 
 lspconfig.lua_ls.setup {
   on_init = function(client)
@@ -205,6 +211,8 @@ lspconfig.omnisharp.setup {
         EnableAnalyzersSupport = nil,
         EnableImportCompletion = nil,
         AnalyzeOpenDocumentsOnly = nil,
+        -- Delete if issues arise
+        EnableDecompilationSupport = true
       },
       Sdk = {
         IncludePrereleases = true,
@@ -246,19 +254,22 @@ lspconfig.omnisharp.setup {
 }
 
 -- Keymaps for omnisharp-extended-lsp
-vim.api.nvim_set_keymap('n', 'gr', "<cmd>lua require('omnisharp_extended').telescope_lsp_references()<cr>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'gd', "<cmd>lua require('omnisharp_extended').telescope_lsp_definition({ jump_type = 'vsplit' })<cr>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>D', "<cmd>lua require('omnisharp_extended').telescope_lsp_type_definition()<cr>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'gi', "<cmd>lua require('omnisharp_extended').telescope_lsp_implementation()<cr>", { noremap = true, silent = true })
--- vim.keymap.set('n', '<leader>D', require("omnisharp_extended").lsp_type_definition, { noremap = true, silent = true })
--- vim.keymap.set('n', 'gd', require('omnisharp_extended').lsp_definition, { noremap=true, silent=true })
--- vim.keymap.set('n', 'gr', require("omnisharp_extended").lsp_references, { noremap = true, silent = true })
--- vim.keymap.set('n', 'gi', require("omnisharp_extended").lsp_implementation, { noremap = true, silent = true })
-
+local opts = { noremap = true, silent = true }
+vim.api.nvim_set_keymap('n', 'gr', "<cmd>lua require('omnisharp_extended').telescope_lsp_references()<cr>", opts)
+vim.api.nvim_set_keymap('n', 'gd', "<cmd>lua require('omnisharp_extended').telescope_lsp_definition({ jump_type = 'vsplit' })<cr>", opts)
+vim.api.nvim_set_keymap('n', '<leader>D', "<cmd>lua require('omnisharp_extended').telescope_lsp_type_definition()<cr>", opts)
+vim.api.nvim_set_keymap('n', 'gi', "<cmd>lua require('omnisharp_extended').telescope_lsp_implementation()<cr>", opts)
+-- vim.api.nvim_set_keymap('n', '<leader>f', "<cmd>lua require('omnisharp_extended').telescope_lsp_formatting()<CR>", opts)
 
 lspconfig.tsserver.setup{}
 
-lspconfig.angularls.setup{}
+local dev_path = "~/Developer/"
+lspconfig.angularls.setup{
+  cmd = {"ngserver", "--stdio", "--tsProbeLocations", dev_path, "--ngProbeLocations", dev_path},
+  on_new_config = function(new_config,new_root_dir)
+    new_config.cmd = {"ngserver", "--stdio", "--tsProbeLocations", dev_path, "--ngProbeLocations", dev_path}
+  end,
+}
 
 lspconfig.html.setup{}
 
