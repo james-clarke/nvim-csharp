@@ -6,10 +6,10 @@
   "mason.nvim": { "branch": "main", "commit": "e2f7f9044ec30067bc11800a9e266664b88cda22" },
   "neo-tree.nvim": { "branch": "v3.x", "commit": "29f7c215332ba95e470811c380ddbce2cebe2af4" },
   "nui.nvim": { "branch": "main", "commit": "61574ce6e60c815b0a0c4b5655b8486ba58089a1" },
-  "nvim-lspconfig": { "branch": "master", "commit": "fdc44768a09a65140aa00c92872a5381ad486485" },
-  "nvim-treesitter": { "branch": "master", "commit": "9f8c99e980f55e72148a95a0fb2e260c95f6341b" },
+  "nvim-lspconfig": { "branch": "master", "commit": "e9b1c95d29ca9e479fc39896b31d24eed96b40a3" },
+  "nvim-treesitter": { "branch": "master", "commit": "d13f0183ba93f9b5aba7359146f294abfffff9c3" },
   "nvim-web-devicons": { "branch": "master", "commit": "5be6c4e685618b99c3210a69375b38a1202369b4" },
-  "omnisharp-extended": { "branch": "main", "commit": "aad7bf06b4ca0de816b919d475a75b30f5f62b61" },
+  "omnisharp-extended-lsp.nvim": { "branch": "main", "commit": "aad7bf06b4ca0de816b919d475a75b30f5f62b61" },
   "plenary.nvim": { "branch": "master", "commit": "a3e3bc82a3f95c5ed0d7201546d5d2c19b20d683" },
   "telescope.nvim": { "branch": "master", "commit": "a0bbec21143c7bc5f8bb02e0005fa0b982edc026" }
 }

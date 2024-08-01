@@ -92,7 +92,6 @@ require("lazy").setup({
     {
       -- omnisharp-extended-lsp.nvim
       "Hoffs/omnisharp-extended-lsp.nvim",
-      name = "omnisharp-extended"
     },
   },
   -- Automatically check for plugin updates
@@ -155,7 +154,8 @@ require("mason-lspconfig").setup {
 }
 
 -- Setup for nvim-lspconfig.nvim
-local lspconfig = require('lspconfig')
+local lspconfig = require("lspconfig")
+local util = require 'lspconfig.util'
 
 lspconfig.lua_ls.setup {
   on_init = function(client)
@@ -193,8 +193,7 @@ vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {})
 vim.keymap.set({'n', 'v'}, '<leader>dn', vim.diagnostic.open_float, {})
 
 lspconfig.omnisharp.setup {
-  cmd = { "dotnet", "/opt/homebrew/Cellar/omnisharp-mono/1.35.3/libexec/OmniSharp.Roslyn.dll"},
-    settings = {
+  settings = {
       FormattingOptions = {
         EnableEditorConfigSupport = true,
         OrganizeImports = nil,
@@ -206,17 +205,55 @@ lspconfig.omnisharp.setup {
         EnableAnalyzersSupport = nil,
         EnableImportCompletion = nil,
         AnalyzeOpenDocumentsOnly = nil,
-        EnableDecompilationSupport = nil,
       },
       Sdk = {
         IncludePrereleases = true,
       },
     },
+
+    filetypes = { 'cs', 'vb' },
+    root_dir = util.root_pattern('*.sln', '*.csproj', 'omnisharp.json', 'function.json'),
+    on_new_config = function(new_config, _)
+      new_config.cmd = { unpack(new_config.cmd or {}) }
+
+      table.insert(new_config.cmd, '-z') -- https://github.com/OmniSharp/omnisharp-vscode/pull/4300
+      vim.list_extend(new_config.cmd, { '--hostPID', tostring(vim.fn.getpid()) })
+      table.insert(new_config.cmd, 'DotNet:enablePackageRestore=false')
+      vim.list_extend(new_config.cmd, { '--encoding', 'utf-8' })
+      table.insert(new_config.cmd, '--languageserver')
+
+      local function flatten(tbl)
+        local ret = {}
+        for k, v in pairs(tbl) do
+          if type(v) == 'table' then
+            for _, pair in ipairs(flatten(v)) do
+              ret[#ret + 1] = k .. ':' .. pair
+            end
+          else
+            ret[#ret + 1] = k .. '=' .. vim.inspect(v)
+          end
+        end
+        return ret
+      end
+      if new_config.settings then
+        vim.list_extend(new_config.cmd, flatten(new_config.settings))
+      end
+
+      new_config.capabilities = vim.deepcopy(new_config.capabilities)
+      new_config.capabilities.workspace.workspaceFolders = false -- https://github.com/OmniSharp/omnisharp-roslyn/issues/909
+    end,
+    init_options = {},
 }
-vim.keymap.set('n', '<leader>gd', 'require("omnisharp_extended").lsp_definition()<CR>', { noremap=true, silent=true })
-vim.keymap.set('n', '<leader>D', '<cmd>lua require("omnisharp_extended").lsp_type_definition()<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', 'gr', '<cmd>lua require("omnisharp_extended").lsp_references()<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', 'gi', '<cmd>lua require("omnisharp_extended").lsp_implementation()<CR>', { noremap = true, silent = true })
+
+-- Keymaps for omnisharp-extended-lsp
+vim.api.nvim_set_keymap('n', 'gr', "<cmd>lua require('omnisharp_extended').telescope_lsp_references()<cr>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'gd', "<cmd>lua require('omnisharp_extended').telescope_lsp_definition({ jump_type = 'vsplit' })<cr>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>D', "<cmd>lua require('omnisharp_extended').telescope_lsp_type_definition()<cr>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'gi', "<cmd>lua require('omnisharp_extended').telescope_lsp_implementation()<cr>", { noremap = true, silent = true })
+-- vim.keymap.set('n', '<leader>D', require("omnisharp_extended").lsp_type_definition, { noremap = true, silent = true })
+-- vim.keymap.set('n', 'gd', require('omnisharp_extended').lsp_definition, { noremap=true, silent=true })
+-- vim.keymap.set('n', 'gr', require("omnisharp_extended").lsp_references, { noremap = true, silent = true })
+-- vim.keymap.set('n', 'gi', require("omnisharp_extended").lsp_implementation, { noremap = true, silent = true })
 
 
 lspconfig.tsserver.setup{}
