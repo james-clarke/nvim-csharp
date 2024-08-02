@@ -99,6 +99,9 @@ require("lazy").setup({
       -- omnisharp-extended-lsp.nvim
       "Hoffs/omnisharp-extended-lsp.nvim",
     },
+    {
+      "nvim-telescope/telescope-ui-select.nvim"
+    },
   },
   -- Automatically check for plugin updates
   checker = { enabled = true },
@@ -200,57 +203,56 @@ vim.keymap.set({'n', 'v'}, '<leader>dn', vim.diagnostic.open_float, {})
 
 lspconfig.omnisharp.setup {
   settings = {
-      FormattingOptions = {
-        EnableEditorConfigSupport = true,
-        OrganizeImports = nil,
-      },
-      MsBuild = {
-        LoadProjectsOnDemand = nil,
-      },
-      RoslynExtensionsOptions = {
-        EnableAnalyzersSupport = nil,
-        EnableImportCompletion = nil,
-        AnalyzeOpenDocumentsOnly = nil,
-        -- Delete if issues arise
-        EnableDecompilationSupport = true
-      },
-      Sdk = {
-        IncludePrereleases = true,
-      },
+    FormattingOptions = {
+      EnableEditorConfigSupport = true,
+      OrganizeImports = nil,
     },
+    MsBuild = {
+      LoadProjectsOnDemand = nil,
+    },
+    RoslynExtensionsOptions = {
+      EnableAnalyzersSupport = nil,
+      EnableImportCompletion = nil,
+      AnalyzeOpenDocumentsOnly = nil,
+      EnableDecompilationSupport = true
+    },
+    Sdk = {
+      IncludePrereleases = true,
+    },
+  },
 
-    filetypes = { 'cs', 'vb' },
-    root_dir = util.root_pattern('*.sln', '*.csproj', 'omnisharp.json', 'function.json'),
-    on_new_config = function(new_config, _)
-      new_config.cmd = { unpack(new_config.cmd or {}) }
+  filetypes = { 'cs', 'vb' },
+  root_dir = util.root_pattern('*.sln', '*.csproj', 'omnisharp.json', 'function.json'),
+  on_new_config = function(new_config, _)
+    new_config.cmd = { unpack(new_config.cmd or {}) }
 
-      table.insert(new_config.cmd, '-z') -- https://github.com/OmniSharp/omnisharp-vscode/pull/4300
-      vim.list_extend(new_config.cmd, { '--hostPID', tostring(vim.fn.getpid()) })
-      table.insert(new_config.cmd, 'DotNet:enablePackageRestore=false')
-      vim.list_extend(new_config.cmd, { '--encoding', 'utf-8' })
-      table.insert(new_config.cmd, '--languageserver')
+    table.insert(new_config.cmd, '-z') -- https://github.com/OmniSharp/omnisharp-vscode/pull/4300
+    vim.list_extend(new_config.cmd, { '--hostPID', tostring(vim.fn.getpid()) })
+    table.insert(new_config.cmd, 'DotNet:enablePackageRestore=false')
+    vim.list_extend(new_config.cmd, { '--encoding', 'utf-8' })
+    table.insert(new_config.cmd, '--languageserver')
 
-      local function flatten(tbl)
-        local ret = {}
-        for k, v in pairs(tbl) do
-          if type(v) == 'table' then
-            for _, pair in ipairs(flatten(v)) do
-              ret[#ret + 1] = k .. ':' .. pair
-            end
-          else
-            ret[#ret + 1] = k .. '=' .. vim.inspect(v)
+    local function flatten(tbl)
+      local ret = {}
+      for k, v in pairs(tbl) do
+        if type(v) == 'table' then
+          for _, pair in ipairs(flatten(v)) do
+            ret[#ret + 1] = k .. ':' .. pair
           end
+        else
+          ret[#ret + 1] = k .. '=' .. vim.inspect(v)
         end
-        return ret
       end
-      if new_config.settings then
-        vim.list_extend(new_config.cmd, flatten(new_config.settings))
-      end
+      return ret
+    end
+    if new_config.settings then
+      vim.list_extend(new_config.cmd, flatten(new_config.settings))
+    end
 
-      new_config.capabilities = vim.deepcopy(new_config.capabilities)
-      new_config.capabilities.workspace.workspaceFolders = false -- https://github.com/OmniSharp/omnisharp-roslyn/issues/909
-    end,
-    init_options = {},
+    new_config.capabilities = vim.deepcopy(new_config.capabilities)
+    new_config.capabilities.workspace.workspaceFolders = false -- https://github.com/OmniSharp/omnisharp-roslyn/issues/909
+  end,
+  init_options = {},
 }
 
 -- Keymaps for omnisharp-extended-lsp
@@ -281,3 +283,12 @@ lspconfig.cssls.setup{
   capabilities = capabilities,
 }
 
+-- Setup for telescope-ui-select.nvim
+require("telescope").setup {
+  extensions = {
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown {}
+    }
+  }
+}
+require("telescope").load_extension("ui-select")
