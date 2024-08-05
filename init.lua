@@ -24,7 +24,7 @@ vim.opt.ignorecase = true
 vim.opt.shiftround = true
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.updatetime = 300
-vim.opt.scrolloff = 999
+vim.opt.scrolloff = 12
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -45,7 +45,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Set mapleader and maplocalleader before loading plugins
 vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
+vim.g.maplocalleader = " "
 
 -- Set mouse support
 vim.o.mouse = 'a'
@@ -157,6 +157,7 @@ require("lazy").setup({
             end
         },
         {
+            -- Setup for mason-lspconfig.nvim
             "williamboman/mason-lspconfig.nvim",
             config = function()
                 require("mason-lspconfig").setup {
@@ -172,9 +173,11 @@ require("lazy").setup({
             end
         },
         {
+            -- Setup for omnisharp-extended-lsp.nvim
             "Hoffs/omnisharp-extended-lsp.nvim",
         },
         {
+            -- Setup for nvim-lspconfig
             "neovim/nvim-lspconfig",
             config = function()
                 -- local variables for lsp-config.nvim
@@ -267,6 +270,7 @@ require("lazy").setup({
                     noremap = true,
                     silent = true
                 }
+
                 vim.api.nvim_set_keymap('n', 'gr', "<cmd>lua require('omnisharp_extended').telescope_lsp_references()<cr>", opts)
                 vim.api.nvim_set_keymap('n', 'gd', "<cmd>lua require('omnisharp_extended').telescope_lsp_definition({ jump_type = 'vsplit' })<cr>", opts)
                 vim.api.nvim_set_keymap('n', '<leader>D', "<cmd>lua require('omnisharp_extended').telescope_lsp_type_definition()<cr>", opts)
