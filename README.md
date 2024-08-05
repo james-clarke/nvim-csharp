@@ -1,4 +1,4 @@
-# A C-Sharp Neovim Configuration for Full-Stack Development
+# The .NET Neovim Configuration
 **Important note**: This repo is a *work in progress*, and still requires a lot of configuration. There's a long list of features I want to make available inside this neovim setup, so the following list has been made to keep track of my progress. If you have any questions, or wish to make suggestions for what needs to be added to the configuration, please contact me through the [Support](#Support) section at the bottom of this file.
 
 ## Features
